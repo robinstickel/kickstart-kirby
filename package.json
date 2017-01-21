@@ -1,0 +1,37 @@
+{
+  "name": "KickStart Kirby - Kirby Starterkit with Gulp & BrowserSync",
+  "version": "0.1.0",
+  "description": "A simple Gulp environment to kickstart development with Kirby CMS",
+  "main": "index.php",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/robinstickel/kickstart-kirby"
+  },
+  "keywords": [
+    "kirby",
+    "starterkit",
+    "gulp",
+    "browsersync",
+    "sass",
+    "php",
+    "server"
+  ],
+  "author": {
+    "name": "Robin Stickel",
+    "email": "hello@robinstickel.com",
+    "url": "robinstickel.com"
+  },
+  "license": "MIT" {
+  },
+  "devDependencies": {
+    "browser-sync": "^2.18.6",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-sourcemaps": "^2.4.0",
+    "gulp-connect-php": "^0.0.8",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-imagemin": "^3.0.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^2.3.1"
+  }
+}
