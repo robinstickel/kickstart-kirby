@@ -43,7 +43,7 @@ gulp.task('imagemin', function() {
 // Start PHP server
 // -----------------------------------
 gulp.task('php', function() {
-    php.server({ base: './', port: 8010, keepalive: true});
+    php.server({ base: './', port: 8010});
 });
 
 
