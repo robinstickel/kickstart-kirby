@@ -1,5 +1,5 @@
 {
-  "name": "KickStart Kirby - Kirby Starterkit with Gulp & BrowserSync",
+  "name": "KickStart-Kirby",
   "version": "0.1.0",
   "description": "A simple Gulp environment to kickstart development with Kirby CMS",
   "main": "index.php",
