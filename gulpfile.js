@@ -1,81 +1,66 @@
-var gulp = require('gulp'),
-    sass = require('gulp-sass'),
-    cssnano = require('gulp-cssnano'),
-    sourcemaps = require('gulp-sourcemaps'),
-    rename = require("gulp-rename"),
-    imagemin = require("gulp-imagemin"),
-    autoprefixer = require('gulp-autoprefixer'),
-    php = require('gulp-connect-php'),
-    browserSync = require('browser-sync').create();
+'use strict';
+
+const { src, dest, watch, parallel, series } = require('gulp');
+const sass = require('gulp-sass')(require('sass'));
+const postcss = require('gulp-postcss');
+const cssnano = require('cssnano');
+const autoprefixer = require('gulp-autoprefixer');
+const rename = require('gulp-rename');
+const terser = require('gulp-terser');
+const browsersync = require('browser-sync');
+const connect = require('gulp-connect-php');
 
 
-// Variables
-// -----------------------------------
-var reload  = browserSync.reload;
-var autoprefixerOptions = { browsers: ['last 2 versions', '> 5%']};
+// Sass Task
+function scssTask() {
+    return src('./assets/sass/*.scss', { sourcemaps: true })
+        .pipe(sass())
+        .pipe(autoprefixer())
+        .pipe(rename({ suffix: '.min' }))
+        .pipe(postcss([cssnano()]))
+        .pipe(dest('./assets/css'))
+};
 
+// JavaScript Task
+function jsTask() {
+    return src(
+            './assets/disc/js/main.js', { sourcemaps: true })
+        .pipe(terser())
+        .pipe(dest('./assets/js', { sourcemaps: '.' }));
+}
 
-// SASS compile, minify, autoprefix, sourcemap and rename
-// -----------------------------------
-gulp.task('styles', function() {
-    return gulp.src('./assets/sass/**/*.scss')
-        .pipe(sourcemaps.init())
-        .pipe(sass().on('error', sass.logError))
-        .pipe(autoprefixer(autoprefixerOptions))
-        .pipe(gulp.dest('./assets/css/'))
-        .pipe(cssnano())
-        .pipe(rename({suffix: '.min'}))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('./assets/css/'))
-        .pipe(reload({stream: true}));
-});
+//Start Server
+function browsersyncServe() {
 
-
-// Images | Compress images
-// -----------------------------------
-gulp.task('imagemin', function() {
-    gulp.src('./assets/images/*')
-        .pipe(imagemin({progressive: true, optimization: 8,}))
-        .pipe(gulp.dest('assets/images'));
-});
-
-
-// Start PHP server
-// -----------------------------------
-gulp.task('php', function() {
-    php.server({ base: './', port: 8010});
-});
-
-
-// Load BrowserSync
-// -----------------------------------
-gulp.task('browser-sync', ['php'], function() {
-    browserSync.init({
-        proxy: '127.0.0.1:8010',
-        port: 8080,
-        open: true,
-        notify: false,
-        snippetOptions: {
-          ignorePaths: ["./panel/**"]
-        },
+    return connect.server({
+        router: './kirby/router.php',
+        port: 8000,
+        keepalive: true,
+        debug: true
+    }, function() {
+        browsersync({
+            proxy: '127.0.0.1:8000',
+            notify: false,
+        })
     });
-});
+}
 
+//Reload Browser
+function browsersyncReload(cb) {
+    browsersync.reload();
+    cb();
+}
 
-// Serve | Launches Dev Environment
-// (use this to work on your project)
-// -----------------------------------
-gulp.task('serve', ['browser-sync'], function() {
-    gulp.watch(['./site/**/*.php', './site/**/*.yml']).on('change', reload);
-    gulp.watch('./assets/sass/**/*.scss', ['styles']);
-});
+// Watch Task
+function watchTask() {
+    watch(['./site/**/*.php', './site/**/*.yml'], browsersyncReload);
+    watch(['assets/sass/**/*.scss'], series(scssTask, browsersyncReload));
+    watch(['assets/sass/**/*.js'], series(jsTask, browsersyncReload));
+}
 
-// Build | Optimizes everything for deployment
-// (use this to deploy your project)
-// -----------------------------------
-gulp.task('build', ['styles', 'imagemin']);
-
-
-// Default Gulp Task | (change this to whatever you like)
-// -----------------------------------
-gulp.task('default', ['serve']);
+exports.default = parallel(
+    scssTask,
+    jsTask,
+    browsersyncServe,
+    watchTask
+);
